@@ -1,5 +1,7 @@
 module Common where
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ) renaming (_≟_ to _≟ₙ_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong) public
+open import Relation.Nullary using (Dec; yes; no) public
 
 -- Basic equipment
 
@@ -12,6 +14,9 @@ abstract
   v₀ = 0
   v₁ = 1
   v₂ = 2
+
+  _≟ₐ_ : (a b : Atom) → Dec (a ≡ b)
+  a ≟ₐ b = a ≟ₙ b
 
 data List (A : Set) : Set where
   •   : List A
