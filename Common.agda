@@ -17,6 +17,9 @@ record Eq (t : Set) : Set where
   a /= b = not (a == b)
 open Eq {{…}} public
 
+_﹕_ : {A B : Set} → A → B → A × B
+a ﹕ b = ⟨ a , b ⟩
+
 
 -- Atoms, used as variable identifiers.
 Atom : Set

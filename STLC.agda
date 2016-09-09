@@ -13,9 +13,6 @@ infixr 10 _⊳_
 Cx : Set
 Cx = List (Atom × ★)
 
-_﹕_ : {A B : Set} → A → B → A × B
-a ﹕ b = ⟨ a , b ⟩
-
 data _⊢_ (Γ : Cx) : ★ → Set where
   var : ∀ {a α}  → (a ﹕ α) ∈ Γ → Γ ⊢ α
   ƛ_↦_ : ∀ {α β} → (a : Atom)   → Γ , (a ﹕ α) ⊢ β → Γ ⊢ α ⊳ β
@@ -32,48 +29,53 @@ FV (M ⋅ N)         = (FV M) ∪ (FV N)
 
 -- λI terms, or terms where each assumption is used at least once.
 λI : ∀ {Γ A} → Γ ⊢ A → Set
-λI (var x) = ⊤
+λI (var x)   = ⊤
 λI (ƛ a ↦ M) = (λI M) × (a ∈ (FV M))
-λI (M ⋅ N) = (λI M) × (λI N)
+λI (M ⋅ N)   = (λI M) × (λI N)
 
 -- Affine terms, or terms where each assumption is used at most once.
 Affine : ∀ {Γ A} → Γ ⊢ A → Set
-Affine (var x) = ⊤
+Affine (var x)   = ⊤
 Affine (ƛ a ↦ M) = Affine M
-Affine (M ⋅ N) = (Affine M) × (Affine N) × (Empty ((FV M) ∩ (FV N)))
+Affine (M ⋅ N)   = (Affine M) × (Affine N) × (Empty ((FV M) ∩ (FV N)))
 
 -- Linear terms, or terms where each assumption is used exactly once.
 Linear : ∀ {Γ A} → Γ ⊢ A → Set
 Linear t = (λI t) × (Affine t)
 
+-- Closed terms, defined as terms derivable from every context.
+Closed : ★ → Set
+Closed a = ∀ {Γ} → Γ ⊢ a
 
--- A few well-known examples of linear terms.
-I : ∅ ⊢ ι ⊳ ι
-I = ƛ v₀ ↦ var head
-I-λI : λI I
-I-λI = ⟨ • , head ⟩
-I-Affine : Affine I
+
+-- A few well-known examples of linear terms, with meta polymorphism,
+-- which is annoying unresolvable by Agda.
+I        : ∀ {α} → Closed (α ⊳ α)
+I        = ƛ v₀ ↦ var head
+I-λI     : ∀ {Γ α} → λI (I {α} {Γ})
+I-λI     = ⟨ • , head ⟩
+I-Affine : ∀ {Γ α} → Affine (I {α} {Γ})
 I-Affine = •
-I-Linear : Linear I
-I-Linear = ⟨ I-λI , I-Affine ⟩
+I-Linear : ∀ {Γ α} → Linear (I {α} {Γ})
+I-Linear {Γ} {α} = ⟨ I-λI {Γ} {α} , I-Affine {Γ} {α} ⟩
 
-B : ∅ ⊢ (ι ⊳ ι) ⊳ (ι ⊳ ι) ⊳ ι ⊳ ι
-B = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ (var (tail (tail head)) ⋅ (var (tail head) ⋅ var head))))
-B-λI : λI B
-B-λI = ⟨ ⟨ ⟨ ⟨ • , ⟨ • , • ⟩ ⟩ , head ⟩ , head ⟩ , head ⟩
-B-Affine : Affine B
+B        : ∀ {α β γ} → Closed ((β ⊳ γ) ⊳ (α ⊳ β) ⊳ α ⊳ γ)
+B        = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ (var (tail (tail head)) ⋅ (var (tail head) ⋅ var head))))
+B-λI     : ∀ {Γ α β γ} → λI (B {α} {β} {γ} {Γ})
+B-λI     = ⟨ ⟨ ⟨ ⟨ • , ⟨ • , • ⟩ ⟩ , head ⟩ , head ⟩ , head ⟩
+B-Affine : ∀ {Γ α β γ} → Affine (B {α} {β} {γ} {Γ})
 B-Affine = ⟨ • , ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , refl ⟩ ⟩
-B-Linear : Linear B
-B-Linear = ⟨ B-λI , B-Affine ⟩
+B-Linear : ∀ {Γ α β γ} → Linear (B {α} {β} {γ} {Γ})
+B-Linear {Γ} {α} {β} {γ} = ⟨ B-λI {Γ} {α} {β} {γ} , B-Affine {Γ} {α} {β} {γ} ⟩
 
-C : ∅ ⊢ (ι ⊳ ι ⊳ ι) ⊳ ι ⊳ ι ⊳ ι
-C = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ var (tail (tail head)) ⋅ var (tail head) ⋅ var head))
-C-λI : λI C
-C-λI = ⟨ ⟨ ⟨ ⟨ ⟨ • , • ⟩ , • ⟩ , head ⟩ , head ⟩ , head ⟩
-C-Affine : Affine C
+C        : ∀ {α β γ} → Closed ((α ⊳ β ⊳ γ) ⊳ β ⊳ α ⊳ γ)
+C        = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ var (tail (tail head)) ⋅ var head ⋅ var (tail head)))
+C-λI     : ∀ {Γ α β γ} → λI (C {α} {β} {γ} {Γ})
+C-λI     = ⟨ ⟨ ⟨ ⟨ ⟨ • , • ⟩ , • ⟩ , tail head ⟩ , head ⟩ , head ⟩
+C-Affine : ∀ {Γ α β γ} → Affine (C {α} {β} {γ} {Γ})
 C-Affine = ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , ⟨ • , refl ⟩ ⟩
-C-Linear : Linear C
-C-Linear = ⟨ C-λI , C-Affine ⟩
+C-Linear : ∀ {Γ α β γ} → Linear (C {α} {β} {γ} {Γ})
+C-Linear {Γ} {α} {β} {γ} = ⟨ C-λI {Γ} {α} {β} {γ} , C-Affine {Γ} {α} {β} {γ} ⟩
 
 
 module AgdaSemantics where
