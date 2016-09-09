@@ -1,4 +1,4 @@
-module STLC where
+module STLC.Definition where
 open import Common
 
 -- Simply typed λ calculus.
@@ -76,21 +76,3 @@ C-Affine : ∀ {Γ α β γ} → Affine (C {α} {β} {γ} {Γ})
 C-Affine = ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , ⟨ • , refl ⟩ ⟩
 C-Linear : ∀ {Γ α β γ} → Linear (C {α} {β} {γ} {Γ})
 C-Linear {Γ} {α} {β} {γ} = ⟨ C-λI {Γ} {α} {β} {γ} , C-Affine {Γ} {α} {β} {γ} ⟩
-
-
-module AgdaSemantics where
-  open import Data.Nat using (ℕ)
-
-  ⟦_⟧★ : ★ → Set
-  ⟦ ι ⟧★       = ℕ
-  ⟦ t₁ ⊳ t₂ ⟧★ = ⟦ t₁ ⟧★ → ⟦ t₂ ⟧★
-
-  ⟦_⟧C : Cx → Set
-  ⟦ ∅ ⟧C     = ⊤
-  ⟦ c , t ⟧C = ⟦ c ⟧C × ⟦ π₂ t ⟧★
-
-  ⟦_⟧ : ∀ {Γ α} → Γ ⊢ α → ⟦ Γ ⟧C → ⟦ α ⟧★
-  ⟦ var head ⟧ c    = π₂ c
-  ⟦ var (tail x) ⟧ c = ⟦ var x ⟧ (π₁ c)
-  ⟦ ƛ x ↦ M ⟧ c       = λ a → ⟦ M ⟧ ⟨ c , a ⟩
-  ⟦ f ⋅ x ⟧ c     = (⟦ f ⟧ c) (⟦ x ⟧ c)
