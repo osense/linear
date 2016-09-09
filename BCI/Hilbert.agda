@@ -59,12 +59,12 @@ module AgdaSemantics where
   _⊨_ : Cx → Form → Set₁
   Γ ⊨ f = ∀ {{V : Valuation}} {Δ} → Δ ⊩★ Γ → Δ ⊩ f
 
-  lookup : ∀ {Γ A} → A ∈ Γ → Γ ⊨ A
-  lookup zero γ    = π₂ γ
-  lookup (suc i) γ = (lookup i) (π₁ γ)
+  lookupᵥ : ∀ {Γ A} → A ∈ Γ → Γ ⊨ A
+  lookupᵥ head γ    = π₂ γ
+  lookupᵥ (tail i) γ = (lookupᵥ i) (π₁ γ)
 
   sound : ∀ {Γ A} → Γ ⊢ A → Γ ⊨ A
-  sound (ID i) γ = lookup i γ
+  sound (ID i) γ = lookupᵥ i γ
   sound (MP f₁ f₂) γ = (sound f₁ γ) (sound f₂ γ)
   sound AB = λ _ x y z → x (y z)
   sound AC = λ _ x y z → x z y

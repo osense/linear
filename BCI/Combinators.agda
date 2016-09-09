@@ -31,12 +31,12 @@ module AgdaSemantics where
   ⟦ t₁ ⊳ t₂ ⟧★ = ⟦ t₁ ⟧★ → ⟦ t₂ ⟧★
 
   ⟦_⟧C : Cx → Set
-  ⟦ • ⟧C     = ⊤
+  ⟦ ∅ ⟧C     = ⊤
   ⟦ c , t ⟧C = ⟦ c ⟧C × ⟦ t ⟧★
 
   ⟦_⟧ : ∀ {Γ α} → Γ ⊢ α → ⟦ Γ ⟧C → ⟦ α ⟧★
-  ⟦ id zero ⟧ c    = proj₂ c
-  ⟦ id (suc x) ⟧ c = ⟦ id x ⟧ (proj₁ c)
+  ⟦ id head ⟧ c    = proj₂ c
+  ⟦ id (tail x) ⟧ c = ⟦ id x ⟧ (proj₁ c)
   ⟦ app f x ⟧ c    = (⟦ f ⟧ c) (⟦ x ⟧ c)
   ⟦ B ⟧ c          = λ x y z → x (y z)
   ⟦ C ⟧ c          = λ x y z → x z y
