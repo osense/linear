@@ -74,23 +74,21 @@ C-Affine : Affine C
 C-Affine = ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , ⟨ • , refl ⟩ ⟩
 C-Linear : Linear C
 C-Linear = ⟨ C-λI , C-Affine ⟩
---
---module AgdaSemantics where
---  open import Data.Nat using (ℕ)
---  open import Data.Unit using (⊤)
---  open import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to _⹁_)
---
---  ⟦_⟧★ : ★ → Set
---  ⟦ ι ⟧★       = ℕ
---  ⟦ t₁ ⊳ t₂ ⟧★ = ⟦ t₁ ⟧★ → ⟦ t₂ ⟧★
---
---  ⟦_⟧C : Cx → Set
---  ⟦ ∅ ⟧C     = ⊤
---  ⟦ c , t ⟧C = ⟦ c ⟧C × ⟦ t ⟧★
---
---  ⟦_⟧ : ∀ {Γ α} → Γ ⊢ α → ⟦ Γ ⟧C → ⟦ α ⟧★
---  ⟦ var head ⟧ c    = proj₂ c
---  ⟦ var (tail x) ⟧ c = ⟦ var x ⟧ (proj₁ c)
---  ⟦ lam t ⟧ c       = λ a → ⟦ t ⟧ (c ⹁ a)
---  ⟦ app f x ⟧ c     = (⟦ f ⟧ c) (⟦ x ⟧ c)
---open AgdaSemantics public
+
+
+module AgdaSemantics where
+  open import Data.Nat using (ℕ)
+
+  ⟦_⟧★ : ★ → Set
+  ⟦ ι ⟧★       = ℕ
+  ⟦ t₁ ⊳ t₂ ⟧★ = ⟦ t₁ ⟧★ → ⟦ t₂ ⟧★
+
+  ⟦_⟧C : Cx → Set
+  ⟦ ∅ ⟧C     = ⊤
+  ⟦ c , t ⟧C = ⟦ c ⟧C × ⟦ π₂ t ⟧★
+
+  ⟦_⟧ : ∀ {Γ α} → Γ ⊢ α → ⟦ Γ ⟧C → ⟦ α ⟧★
+  ⟦ var head ⟧ c    = π₂ c
+  ⟦ var (tail x) ⟧ c = ⟦ var x ⟧ (π₁ c)
+  ⟦ ƛ x ↦ M ⟧ c       = λ a → ⟦ M ⟧ ⟨ c , a ⟩
+  ⟦ f ⋅ x ⟧ c     = (⟦ f ⟧ c) (⟦ x ⟧ c)
