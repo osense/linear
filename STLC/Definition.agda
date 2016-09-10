@@ -49,30 +49,30 @@ Closed a = ∀ {Γ} → Γ ⊢ a
 
 
 -- A few well-known examples of linear terms, with meta polymorphism,
--- which is annoying unresolvable by Agda.
-I        : ∀ {α} → Closed (α ⊳ α)
+-- which is annoyingly unresolvable by Agda.
+I        : ∀ {Γ α} → Γ ⊢ (α ⊳ α)
 I        = ƛ v₀ ↦ var head
-I-λI     : ∀ {Γ α} → λI (I {α} {Γ})
+I-λI     : ∀ {Γ α} → λI (I {Γ} {α})
 I-λI     = ⟨ • , head ⟩
-I-Affine : ∀ {Γ α} → Affine (I {α} {Γ})
+I-Affine : ∀ {Γ α} → Affine (I {Γ} {α})
 I-Affine = •
-I-Linear : ∀ {Γ α} → Linear (I {α} {Γ})
+I-Linear : ∀ {Γ α} → Linear (I {Γ} {α})
 I-Linear {Γ} {α} = ⟨ I-λI {Γ} {α} , I-Affine {Γ} {α} ⟩
 
-B        : ∀ {α β γ} → Closed ((β ⊳ γ) ⊳ (α ⊳ β) ⊳ α ⊳ γ)
+B        : ∀ {Γ α β γ} → Γ ⊢ ((β ⊳ γ) ⊳ (α ⊳ β) ⊳ α ⊳ γ)
 B        = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ (var (tail (tail head)) ⋅ (var (tail head) ⋅ var head))))
-B-λI     : ∀ {Γ α β γ} → λI (B {α} {β} {γ} {Γ})
+B-λI     : ∀ {Γ α β γ} → λI (B {Γ} {α} {β} {γ})
 B-λI     = ⟨ ⟨ ⟨ ⟨ • , ⟨ • , • ⟩ ⟩ , head ⟩ , head ⟩ , head ⟩
-B-Affine : ∀ {Γ α β γ} → Affine (B {α} {β} {γ} {Γ})
+B-Affine : ∀ {Γ α β γ} → Affine (B {Γ} {α} {β} {γ})
 B-Affine = ⟨ • , ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , refl ⟩ ⟩
-B-Linear : ∀ {Γ α β γ} → Linear (B {α} {β} {γ} {Γ})
+B-Linear : ∀ {Γ α β γ} → Linear (B {Γ} {α} {β} {γ})
 B-Linear {Γ} {α} {β} {γ} = ⟨ B-λI {Γ} {α} {β} {γ} , B-Affine {Γ} {α} {β} {γ} ⟩
 
-C        : ∀ {α β γ} → Closed ((α ⊳ β ⊳ γ) ⊳ β ⊳ α ⊳ γ)
+C        : ∀ {Γ α β γ} → Γ ⊢ ((α ⊳ β ⊳ γ) ⊳ β ⊳ α ⊳ γ)
 C        = ƛ v₀ ↦ (ƛ v₁ ↦ (ƛ v₂ ↦ var (tail (tail head)) ⋅ var head ⋅ var (tail head)))
-C-λI     : ∀ {Γ α β γ} → λI (C {α} {β} {γ} {Γ})
+C-λI     : ∀ {Γ α β γ} → λI (C {Γ} {α} {β} {γ})
 C-λI     = ⟨ ⟨ ⟨ ⟨ ⟨ • , • ⟩ , • ⟩ , tail head ⟩ , head ⟩ , head ⟩
-C-Affine : ∀ {Γ α β γ} → Affine (C {α} {β} {γ} {Γ})
+C-Affine : ∀ {Γ α β γ} → Affine (C {Γ} {α} {β} {γ})
 C-Affine = ⟨ ⟨ • , ⟨ • , refl ⟩ ⟩ , ⟨ • , refl ⟩ ⟩
-C-Linear : ∀ {Γ α β γ} → Linear (C {α} {β} {γ} {Γ})
+C-Linear : ∀ {Γ α β γ} → Linear (C {Γ} {α} {β} {γ})
 C-Linear {Γ} {α} {β} {γ} = ⟨ C-λI {Γ} {α} {β} {γ} , C-Affine {Γ} {α} {β} {γ} ⟩
