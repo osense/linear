@@ -1,17 +1,9 @@
 module BCI.Combinators.Definition where
 open import Common
+open import STLC using (★; ι; _⊳_; Cx) public
 
 -- BCI "linear" typed combinator calculus.
 
-
-data ★ : Set where
-  ι : ★
-  _⊳_ : ★ → ★ → ★
-infixr 10 _⊳_
-
--- Context as a list of named assumptions.
-Cx : Set
-Cx = List (Atom × ★)
 
 data _⊢_ (Γ : Cx) : ★ → Set where
   id  : ∀ {α a}   → (a ﹕ α) ∈ Γ → Γ ⊢ α
@@ -20,3 +12,8 @@ data _⊢_ (Γ : Cx) : ★ → Set where
   C   : ∀ {α β γ} → Γ ⊢ (α ⊳ (β ⊳ γ)) ⊳ (β ⊳ (α ⊳ γ))
   I   : ∀ {α}     → Γ ⊢ α ⊳ α
 infix 1 _⊢_
+
+
+-- Closed terms.
+Closed : ★ → Set
+Closed t = ∅ ⊢ t
