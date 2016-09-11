@@ -22,3 +22,7 @@ open import Data.Nat using (ℕ)
 ⟦ var (tail x) ⟧ c = ⟦ var x ⟧ (π₁ c)
 ⟦ ƛ x ↦ M ⟧ c      = λ a → ⟦ M ⟧ ⟨ c , a ⟩
 ⟦ f ⋅ x ⟧ c        = (⟦ f ⟧ c) (⟦ x ⟧ c)
+
+-- Specialization for closed terms.
+⟦_⟧∅ : ∀ {α} → Closed α → ⟦ α ⟧★
+⟦_⟧∅ a = ⟦ a ⟧ •
