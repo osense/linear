@@ -60,8 +60,8 @@ module AgdaSemantics where
   Γ ⊨ f = ∀ {{V : Valuation}} {Δ} → Δ ⊩★ Γ → Δ ⊩ f
 
   lookupᵥ : ∀ {Γ A} → A ∈ Γ → Γ ⊨ A
-  lookupᵥ head γ    = π₂ γ
-  lookupᵥ (tail i) γ = (lookupᵥ i) (π₁ γ)
+  lookupᵥ zero γ    = π₂ γ
+  lookupᵥ (suc i) γ = (lookupᵥ i) (π₁ γ)
 
   sound : ∀ {Γ A} → Γ ⊢ A → Γ ⊨ A
   sound (ID i) γ = lookupᵥ i γ
