@@ -40,15 +40,15 @@ v₁ = 1
 v₂ = 2
 
 _==ₙ_ : ℕ → ℕ → Bool
-ℕ.zero ==ₙ ℕ.zero = true
-ℕ.zero ==ₙ ℕ.suc b = false
-ℕ.suc a ==ₙ ℕ.zero = false
+ℕ.zero  ==ₙ ℕ.zero  = true
+ℕ.zero  ==ₙ ℕ.suc b = false
+ℕ.suc a ==ₙ ℕ.zero  = false
 ℕ.suc a ==ₙ ℕ.suc b = a ==ₙ b
 
 _==ᶠ_ : ∀ {n} → Fin n → Fin n → Bool
-zeroᶠ ==ᶠ zeroᶠ = true
-zeroᶠ ==ᶠ sucᶠ b = false
-sucᶠ a ==ᶠ zeroᶠ = false
+zeroᶠ  ==ᶠ zeroᶠ  = true
+zeroᶠ  ==ᶠ sucᶠ b = false
+sucᶠ a ==ᶠ zeroᶠ  = false
 sucᶠ a ==ᶠ sucᶠ b = a ==ᶠ b
 
 instance Eqₐ : Eq Atom
@@ -110,7 +110,7 @@ data _∈_ {A} : A → List A → Set where
 infix 8 _∈_
 
 ∈-to-Fin : ∀ {A} {L : List A} {x : A} → x ∈ L → Fin (len L)
-∈-to-Fin zero = zeroᶠ
+∈-to-Fin zero    = zeroᶠ
 ∈-to-Fin (suc p) = sucᶠ (∈-to-Fin p)
 
 -- Context extension.
@@ -134,15 +134,15 @@ keep-inv (keep e) = e
 
 -- Some helpful lemmas.
 mono∈ : ∀ {A} {Γ Γ' : List A} {x : A} → Γ ⊆ Γ' → x ∈ Γ → x ∈ Γ'
-mono∈ stop i = i
-mono∈ (skip e) i = suc (mono∈ e i)
-mono∈ (keep e) zero = zero
+mono∈ stop i           = i
+mono∈ (skip e) i       = suc (mono∈ e i)
+mono∈ (keep e) zero    = zero
 mono∈ (keep e) (suc i) = suc (mono∈ e i)
 
 trans⊆ : ∀ {A} {Γ Γ' Γ'' : List A} → Γ ⊆ Γ' → Γ' ⊆ Γ'' → Γ ⊆ Γ''
-trans⊆ e₁ stop = e₁
-trans⊆ e₁ (skip e₂) = skip (trans⊆ e₁ e₂)
-trans⊆ stop (keep e₂) = keep e₂
+trans⊆ e₁ stop             = e₁
+trans⊆ e₁ (skip e₂)        = skip (trans⊆ e₁ e₂)
+trans⊆ stop (keep e₂)      = keep e₂
 trans⊆ (skip e₁) (keep e₂) = skip (trans⊆ e₁ e₂)
 trans⊆ (keep e₁) (keep e₂) = keep (trans⊆ e₁ e₂)
 
@@ -154,7 +154,7 @@ _⧺_ : ∀ {A} → List A → List A → List A
 infixl 9 _⧺_
 
 ⧺-∅-unitₗ : ∀ {A} {l : List A} → ∅ ⧺ l ≡ l
-⧺-∅-unitₗ {l = ∅} = refl
+⧺-∅-unitₗ {l = ∅}     = refl
 ⧺-∅-unitₗ {l = l , x} = cong₂ _,_ (⧺-∅-unitₗ {l = l}) refl
 
 ⧺-Empty : ∀ {A} {L₁ L₂ : List A} → Empty L₁ → Empty L₂ → Empty (L₁ ⧺ L₂)
@@ -162,18 +162,18 @@ infixl 9 _⧺_
 ⧺-Empty {L₂ = L₂ , x} p₁ ()
 
 ⊆-⧺-weaken₁ : ∀ {A} {Γ Γ₁ Γ₂ : List A} → Γ₁ ⧺ Γ₂ ⊆ Γ → Γ₁ ⊆ Γ
-⊆-⧺-weaken₁ {Γ₂ = ∅} e = e
+⊆-⧺-weaken₁ {Γ₂ = ∅} e      = e
 ⊆-⧺-weaken₁ {Γ₂ = Γ₂ , x} e = ⊆-⧺-weaken₁ {Γ₂ = Γ₂} (skip-inv e)
 
 
 -- Subtracting a value from a list, once only.
 _-_ : ∀ {A} {{== : Eq A}} → List A → A → List A
-∅ - x = ∅
+∅ - x        = ∅
 (l , x') - x = if x == x' then l else (l - x) , x'
 
 -- Generalization of _-_ that subtracts multiple values.
 _-★_ : ∀ {A} {{== : Eq A}} → List A → List A → List A
-l₁ -★ ∅ = l₁
+l₁ -★ ∅        = l₁
 l₁ -★ (l₂ , x) = (l₁ - x) -★ l₂
 
 -- Set-theoretic list union.
@@ -183,12 +183,12 @@ l₁ ∪ l₂ = l₁ ⧺ (l₂ -★ l₁)
 
 -- Looking up an element in a list
 lookup : ∀ {A} {{== : Eq A}} → A → List A → Bool
-lookup a ∅ = false
+lookup a ∅        = false
 lookup a (xs , x) = if a == x then true else lookup a xs
 
 -- Set-theoretic list intersection.
 _∩_ : ∀ {A} {{== : Eq A}} → List A → List A → List A
-∅ ∩ l₂ = ∅
+∅ ∩ l₂        = ∅
 (l₁ , x) ∩ l₂ = if (lookup x l₂) then (l₁ ∩ l₂) , x
                                  else (l₁ ∩ l₂)
 

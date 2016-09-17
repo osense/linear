@@ -64,8 +64,8 @@ module AgdaSemantics where
   lookupᵥ (suc i) γ = (lookupᵥ i) (π₁ γ)
 
   sound : ∀ {Γ A} → Γ ⊢ A → Γ ⊨ A
-  sound (ID i) γ = lookupᵥ i γ
+  sound (ID i) γ     = lookupᵥ i γ
   sound (MP f₁ f₂) γ = (sound f₁ γ) (sound f₂ γ)
-  sound AB = λ _ x y z → x (y z)
-  sound AC = λ _ x y z → x z y
-  sound AI = λ _ x → x
+  sound AB           = λ _ x y z → x (y z)
+  sound AC           = λ _ x y z → x z y
+  sound AI           = λ _ x → x
