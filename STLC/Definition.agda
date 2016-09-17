@@ -21,6 +21,10 @@ infix 1 _⊢_
 infixr 5 ƛ_
 infixl 6 _⋅_
 
+weaken⊢ : ∀ {Γ Δ α} → Γ ⊢ α → Γ ⊆ Δ → Δ ⊢ α
+weaken⊢ (var x) γ = var (mono∈ γ x)
+weaken⊢ (ƛ M) γ   = ƛ (weaken⊢ M (keep γ))
+weaken⊢ (M ⋅ N) γ = (weaken⊢ M γ) ⋅ (weaken⊢ N γ)
 
 -- Free variables in a term, with duplicates.
 FV : ∀ {Γ A} → Γ ⊢ A → List (Fin (len Γ))
