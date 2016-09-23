@@ -177,3 +177,26 @@ _∩_ : ∀ {A} {{== : Eq A}} → List A → List A → List A
 Empty∩₁ : ∀ {A} {{== : Eq A}} {L₁ L₂ : List A} → Empty L₁ → Empty (L₁ ∩ L₂)
 Empty∩₁ {L₁ = ∅} p = refl
 Empty∩₁ {L₁ = L₁ , x} ()
+
+
+-- I am tempted to call this "Functional term reasoning".
+-- TODO: Figure out if Relation.Binary.PreorderReasoning can be implemented with this.
+-- One observation is that PreorderReasoning lets me type in values (that Agda doesn't need to see),
+-- whereas this lets me punch in types of the values I am operating on.
+-- However this is unlikely to make a difference, as it should be easy to lift values
+-- to their respective types.
+infix 1 begin[_]_
+infixr 2 _↝[_]_ _↝[]_
+infix 3 _∎
+
+begin[_]_ : {A B : Set} → A → (A → B) → B
+begin[ x ] f = f x
+
+_↝[_]_ : {a b c : Set} → Set → (a → b) → (b → c) → (a → c)
+_ ↝[ f ] g = g ∘ f
+
+_↝[]_ : {a b : Set} → Set → (a → b) → (a → b)
+_ ↝[] g = g
+
+_∎ : {a : Set} → Set → (a → a)
+_ ∎ = λ x → x
