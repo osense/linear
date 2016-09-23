@@ -12,9 +12,9 @@ data _⊢_ (Γ : Cx) : ★ → Set where
   var : ∀ {α}   → α ∈ Γ     → Γ ⊢ α
   ƛ_  : ∀ {α β} → Γ , α ⊢ β → Γ ⊢ α ⊳ β
   _⋅_ : ∀ {α β} → Γ ⊢ α ⊳ β → Γ ⊢ α → Γ ⊢ β
-infix 1 _⊢_
-infixr 5 ƛ_
-infixl 6 _⋅_
+infix 5 _⊢_
+infixr 6 ƛ_
+infixl 7 _⋅_
 
 
 cong⊢ : ∀ {Γ Δ α} → Γ ⊢ α → Γ ≡ Δ → Δ ⊢ α
@@ -30,7 +30,11 @@ contract : ∀ {Γ x α} → Γ , x , x ⊢ α → Γ , x ⊢ α
 contract M = (ƛ M) ⋅ var zero
 
 exchange : ∀ {Γ x y α} → Γ , x , y ⊢ α → Γ , y , x ⊢ α
-exchange M = (weaken (ƛ ƛ M) (skip (skip stop))) ⋅ (var zero) ⋅ (var (suc zero))
+exchange {Γ} {x} {y} {α} M = begin[ M ]
+  Γ , x , y ⊢ α         ↝[ ƛ_ ∘ ƛ_ ]
+  Γ ⊢ x ⊳ y ⊳ α         ↝[ (λ this → weaken this (skip (skip stop))) ]
+  Γ , y , x ⊢ x ⊳ y ⊳ α ↝[ (λ this → this ⋅ (var zero) ⋅ (var (suc zero))) ]
+  Γ , y , x ⊢ α ∎
 
 
 -- Detachment theorem.
@@ -43,14 +47,16 @@ exchange⧺1 : ∀ {Γ x α} → Γ , x ⊢ α → [ x ] ⧺ Γ ⊢ α
 exchange⧺1 {∅} M     = M
 exchange⧺1 {Γ , x} M = det (exchange⧺1 (ƛ (exchange M)))
 
--- TODO: Something about this?
 exchange⧺ : ∀ {Γ₁ Γ₂ α} → Γ₁ ⧺ Γ₂ ⊢ α → Γ₂ ⧺ Γ₁ ⊢ α
-exchange⧺ {Γ₂ = ∅} M           = cong⊢ M (sym (unit⧺ₗ))
-exchange⧺ {Γ₁} {Γ₂ = xs , x} M = cong⊢ (exchange⧺ {Γ₁ = [ x ] ⧺ Γ₁} {Γ₂ = xs}
-                                         (cong⊢
-                                           (exchange⧺1 M)
-                                           (assoc⧺ {L₁ = [ x ]} {Γ₁} {xs})))
-                                       (trans (assoc⧺ {L₁ = xs} {[ x ]} {Γ₁}) refl)
+exchange⧺ {Γ₂ = ∅} M          = cong⊢ M (sym (unit⧺ₗ))
+exchange⧺ {Γ₁} {xs , x} {α} M = begin[ M ]
+  Γ₁ ⧺ (xs , x) ⊢ α     ↝[]
+  (Γ₁ ⧺ xs) , x ⊢ α     ↝[ (λ this → exchange⧺1 this) ]
+  [ x ] ⧺ (Γ₁ ⧺ xs) ⊢ α ↝[ (λ this → cong⊢ this (assoc⧺ {L₁ = [ x ]} {Γ₁} {xs})) ]
+  ([ x ] ⧺ Γ₁) ⧺ xs ⊢ α ↝[ exchange⧺ {[ x ] ⧺ Γ₁} {xs} ]
+  xs ⧺ ([ x ] ⧺ Γ₁) ⊢ α ↝[ (λ this → cong⊢ this (assoc⧺ {L₁ = xs} {[ x ]} {Γ₁})) ]
+  (xs ⧺ [ x ]) ⧺ Γ₁ ⊢ α ↝[]
+  (xs , x) ⧺ Γ₁ ⊢ α ∎
 
 
 -- Free variables in a term, with duplicates.
