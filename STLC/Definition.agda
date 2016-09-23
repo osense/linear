@@ -4,12 +4,7 @@ open import Common
 -- Simply typed λ calculus.
 
 
-data ★ : Set where
-  ι : ★
-  _⊳_ : ★ → ★ → ★
-infixr 10 _⊳_
-
--- Context as a list of named assumptions.
+-- Context as a list of assumptions.
 Cx : Set
 Cx = List ★
 
@@ -21,10 +16,42 @@ infix 1 _⊢_
 infixr 5 ƛ_
 infixl 6 _⋅_
 
-weaken⊢ : ∀ {Γ Δ α} → Γ ⊢ α → Γ ⊆ Δ → Δ ⊢ α
-weaken⊢ (var x) γ = var (mono∈ γ x)
-weaken⊢ (ƛ M) γ   = ƛ (weaken⊢ M (keep γ))
-weaken⊢ (M ⋅ N) γ = (weaken⊢ M γ) ⋅ (weaken⊢ N γ)
+
+cong⊢ : ∀ {Γ Δ α} → Γ ⊢ α → Γ ≡ Δ → Δ ⊢ α
+cong⊢ M refl = M
+
+-- Implicit structural rules.
+weaken : ∀ {Γ Δ α} → Γ ⊢ α → Γ ⊆ Δ → Δ ⊢ α
+weaken (var x) γ = var (mono∈ γ x)
+weaken (ƛ M) γ   = ƛ (weaken M (keep γ))
+weaken (M ⋅ N) γ = (weaken M γ) ⋅ (weaken N γ)
+
+contract : ∀ {Γ x α} → Γ , x , x ⊢ α → Γ , x ⊢ α
+contract M = (ƛ M) ⋅ var zero
+
+exchange : ∀ {Γ x y α} → Γ , x , y ⊢ α → Γ , y , x ⊢ α
+exchange M = (weaken (ƛ ƛ M) (skip (skip stop))) ⋅ (var zero) ⋅ (var (suc zero))
+
+
+-- Detachment theorem.
+det : ∀ {Γ α β} → Γ ⊢ α ⊳ β → Γ , α ⊢ β
+det M = (weaken M (skip stop)) ⋅ var zero
+
+
+-- Exchange with ⧺.
+exchange⧺1 : ∀ {Γ x α} → Γ , x ⊢ α → [ x ] ⧺ Γ ⊢ α
+exchange⧺1 {∅} M     = M
+exchange⧺1 {Γ , x} M = det (exchange⧺1 (ƛ (exchange M)))
+
+-- TODO: Something about this?
+exchange⧺ : ∀ {Γ₁ Γ₂ α} → Γ₁ ⧺ Γ₂ ⊢ α → Γ₂ ⧺ Γ₁ ⊢ α
+exchange⧺ {Γ₂ = ∅} M           = cong⊢ M (sym (unit⧺ₗ))
+exchange⧺ {Γ₁} {Γ₂ = xs , x} M = cong⊢ (exchange⧺ {Γ₁ = [ x ] ⧺ Γ₁} {Γ₂ = xs}
+                                         (cong⊢
+                                           (exchange⧺1 M)
+                                           (assoc⧺ {L₁ = [ x ]} {Γ₁} {xs})))
+                                       (trans (assoc⧺ {L₁ = xs} {[ x ]} {Γ₁}) refl)
+
 
 -- Free variables in a term, with duplicates.
 FV : ∀ {Γ A} → Γ ⊢ A → List (Fin (len Γ))
