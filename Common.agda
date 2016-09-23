@@ -192,11 +192,11 @@ infix 3 _∎
 begin[_]_ : {A B : Set} → A → (A → B) → B
 begin[ x ] f = f x
 
-_↝[_]_ : {a b c : Set} → Set → (a → b) → (b → c) → (a → c)
+_↝[_]_ : {B C : Set} → (A : Set) → (A → B) → (B → C) → (A → C)
 _ ↝[ f ] g = g ∘ f
 
-_↝[]_ : {a b : Set} → Set → (a → b) → (a → b)
+_↝[]_ : {B : Set} → (A : Set) → (A → B) → (A → B)
 _ ↝[] g = g
 
-_∎ : {a : Set} → Set → (a → a)
+_∎ : (A : Set) → (A → A)
 _ ∎ = λ x → x
