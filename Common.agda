@@ -11,13 +11,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open import Relation.Nullary                      using (Dec; yes; no; ¬_) public
 
 
--- Types reused by multiple systems.
-data ★ : Set where
-  ι   : ★
-  _⊳_ : ★ → ★ → ★
-infixr 8 _⊳_
-
-
 -- Equality instances.
 record Eq (t : Set) : Set where
   field
@@ -112,9 +105,6 @@ infix 8 _⊆_
 
 
 -- Some helpful lemmas.
-cong⊆₁ : ∀ {A} {L₁ L₁' L₂ : List A} → L₁ ⊆ L₂ → L₁ ≡ L₁' → L₁' ⊆ L₂
-cong⊆₁ p refl = p
-
 ⊆-∅ : ∀ {A} {L : List A} → ∅ ⊆ L
 ⊆-∅ {L = ∅}      = stop
 ⊆-∅ {L = xs , x} = skip ⊆-∅
@@ -179,7 +169,7 @@ Empty∩₁ {L₁ = ∅} p = refl
 Empty∩₁ {L₁ = L₁ , x} ()
 
 
--- I am tempted to call this "Functional term reasoning".
+-- I am tempted to call this "Functional (term) reasoning".
 -- TODO: Figure out if Relation.Binary.PreorderReasoning can be implemented with this.
 -- One observation is that PreorderReasoning lets me type in values (that Agda doesn't need to see),
 -- whereas this lets me punch in types of the values I am operating on.
@@ -200,3 +190,10 @@ _ ↝[] g = g
 
 _∎ : (A : Set) → (A → A)
 _ ∎ = λ x → x
+
+
+-- Types reused by multiple systems.
+data ★ : Set where
+  ι   : ★
+  _⊳_ : ★ → ★ → ★
+infixr 8 _⊳_

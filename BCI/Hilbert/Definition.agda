@@ -15,8 +15,10 @@ Cx = List Form
 data _⊢_ : Cx → Form → Set where
   ID : ∀ {Γ A}     → A ∈ Γ
                      → Γ ⊢ A
-  MP : ∀ {Γ A B}   → Γ ⊢ A ⇒ B → Γ ⊢ A
-                     → Γ ⊢ B
+  MP : ∀ {Γ₁ Γ₂ A B}   → Γ₁ ⊢ A ⇒ B → Γ₂ ⊢ A
+                     → Γ₁ ⁏ Γ₂ ⊢ B
+  EX : ∀ {Γ₁ Γ₂ A} → Γ₁ ⁏ Γ₂ ⊢ A
+                     → Γ₂ ⁏ Γ₁ ⊢ A
   AB : ∀ {Γ A B C} → Γ ⊢ (B ⇒ C) ⇒ (A ⇒ B) ⇒ (A ⇒ C)
   AC : ∀ {Γ A B C} → Γ ⊢ (A ⇒ (B ⇒ C)) ⇒ B ⇒ (A ⇒ C)
   AI : ∀ {Γ A}     → Γ ⊢ A ⇒ A
@@ -26,12 +28,3 @@ infix 5 _⊢_
 -- K = MP AC (DT AI)
 -- It's harder to find a construction for S, however I managed to prove completeness
 -- with the deduction theorem in a structure which is also complete for IPC.
-
-
--- Monotonicity of ⊢ with respect to context extension.
-mono⊢ : ∀ {Γ Γ' A} → Γ ⊆ Γ' → Γ ⊢ A → Γ' ⊢ A
-mono⊢ γ (ID i)     = ID (mono∈ γ i)
-mono⊢ γ (MP f₁ f₂) = MP (mono⊢ γ f₁) (mono⊢ γ f₂)
-mono⊢ γ AB         = AB
-mono⊢ γ AC         = AC
-mono⊢ γ AI         = AI
