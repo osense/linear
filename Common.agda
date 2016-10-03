@@ -7,7 +7,7 @@ open import Data.Fin                              using (Fin) renaming (zero to 
 open import Data.Product                          using (_×_) renaming (_,_ to ⟨_,_⟩; proj₁ to π₁; proj₂ to π₂) public
 open import Data.Bool                             using (Bool; true; false; if_then_else_; not) renaming (_∧_ to _and_; _∨_ to _or_) public
 open import Data.Maybe                            using (Maybe; just; nothing) renaming (monad to Mmonad) public
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong₂) public
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst₂; cong₂) public
 open import Relation.Nullary                      using (Dec; yes; no; ¬_) public
 
 
@@ -136,9 +136,12 @@ assoc⧺ : ∀ {A} {L₁ L₂ L₃ : List A} → L₁ ⧺ (L₂ ⧺ L₃) ≡ (L
 assoc⧺ {L₃ = ∅} = refl
 assoc⧺ {L₃ = xs , x} = cong₂ _,_ (assoc⧺ {L₃ = xs}) refl
 
-unit⧺ₗ : ∀ {A} {L : List A} → ∅ ⧺ L ≡ L
-unit⧺ₗ {L = ∅} = refl
-unit⧺ₗ {L = xs , x} = cong₂ _,_ (unit⧺ₗ {L = xs}) refl
+unit⧺₁ : ∀ {A} {L : List A} → ∅ ⧺ L ≡ L
+unit⧺₁ {L = ∅} = refl
+unit⧺₁ {L = xs , x} = cong₂ _,_ (unit⧺₁ {L = xs}) refl
+
+unit⧺₂ : ∀ {A} {L₁ L₂ : List A} → ∅ ⧺ L₁ ⧺ L₂ ≡ L₁ ⧺ L₂
+unit⧺₂ {L₁ = L₁} {L₂} = trans (sym (assoc⧺ {L₁ = ∅} {L₁} {L₂})) unit⧺₁
 
 ⧺-⊆₁ : ∀ {A} {L₁ L₂ : List A} → L₁ ⊆ (L₁ ⧺ L₂)
 ⧺-⊆₁ {L₂ = ∅} = stop

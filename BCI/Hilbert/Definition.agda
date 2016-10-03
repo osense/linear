@@ -13,18 +13,26 @@ Cx : Set
 Cx = List Form
 
 data _⊢_ : Cx → Form → Set where
-  ID : ∀ {Γ A}     → A ∈ Γ
-                     → Γ ⊢ A
-  MP : ∀ {Γ₁ Γ₂ A B}   → Γ₁ ⊢ A ⇒ B → Γ₂ ⊢ A
-                     → Γ₁ ⁏ Γ₂ ⊢ B
-  EX : ∀ {Γ₁ Γ₂ A} → Γ₁ ⁏ Γ₂ ⊢ A
-                     → Γ₂ ⁏ Γ₁ ⊢ A
-  AB : ∀ {Γ A B C} → Γ ⊢ (B ⇒ C) ⇒ (A ⇒ B) ⇒ (A ⇒ C)
-  AC : ∀ {Γ A B C} → Γ ⊢ (A ⇒ (B ⇒ C)) ⇒ B ⇒ (A ⇒ C)
-  AI : ∀ {Γ A}     → Γ ⊢ A ⇒ A
+  ID : ∀ {A}         → [ A ] ⊢ A
+  MP : ∀ {Γ₁ Γ₂ A B} → Γ₁ ⊢ A ⇒ B  → Γ₂ ⊢ A → Γ₁ ⁏ Γ₂ ⊢ B
+  EX : ∀ {Γ₁ Γ₂ A}   → Γ₁ ⁏ Γ₂ ⊢ A → Γ₂ ⁏ Γ₁ ⊢ A
+  AB : ∀ {A B C}     → ∅ ⊢ (B ⇒ C) ⇒ (A ⇒ B) ⇒ (A ⇒ C)
+  AC : ∀ {A B C}     → ∅ ⊢ (A ⇒ B ⇒ C) ⇒ B ⇒ A ⇒ C
+  AI : ∀ {A}         → ∅ ⊢ A ⇒ A
 infix 5 _⊢_
--- Note: Adding deduction theorem as an axiom makes this system equivalent to SKI:
--- K : ∀ {A B} → ∅ ⊢ A ⇒ B ⇒ A
--- K = MP AC (DT AI)
--- It's harder to find a construction for S, however I managed to prove completeness
--- with the deduction theorem in a structure which is also complete for IPC.
+
+
+det : ∀ {Γ A B} → Γ ⊢ A ⇒ B → Γ , A ⊢ B
+det t = MP t ID
+
+ded : ∀ {Γ Δ A B} → Γ ⊢ B → Γ ≡ Δ , A → Δ ⊢ A ⇒ B
+ded ID refl                       = AI
+ded (MP {Γ₂ = ∅} t₁ t₂) eq        = subst₂ _⊢_ unit⧺₁ refl (MP (MP AC (ded t₁ eq)) t₂)
+ded (MP {Γ₁} {xs , A} t₁ t₂) refl = subst₂ _⊢_ (unit⧺₂ {L₁ = Γ₁} {xs}) refl (MP (MP AB t₁) (ded t₂ refl))
+ded (EX {∅} t) refl               = subst₂ _⊢_ unit⧺₁ refl (ded t refl)
+ded (EX {Γ₁ , A} {∅} t) refl      = subst₂ _⊢_ (sym unit⧺₁) refl (ded t refl)
+ded (EX {Γ₁ , A} {Γ₂ , x} t) refl = {!!}
+ded AB ()
+ded AC ()
+ded AI ()
+
