@@ -13,26 +13,35 @@ Cx : Set
 Cx = List Form
 
 data _⊢_ : Cx → Form → Set where
-  ID : ∀ {A}         → [ A ] ⊢ A
-  MP : ∀ {Γ₁ Γ₂ A B} → Γ₁ ⊢ A ⇒ B  → Γ₂ ⊢ A → Γ₁ ⁏ Γ₂ ⊢ B
-  EX : ∀ {Γ₁ Γ₂ A}   → Γ₁ ⁏ Γ₂ ⊢ A → Γ₂ ⁏ Γ₁ ⊢ A
-  AB : ∀ {A B C}     → ∅ ⊢ (B ⇒ C) ⇒ (A ⇒ B) ⇒ (A ⇒ C)
-  AC : ∀ {A B C}     → ∅ ⊢ (A ⇒ B ⇒ C) ⇒ B ⇒ A ⇒ C
-  AI : ∀ {A}         → ∅ ⊢ A ⇒ A
+  ID : ∀ {A}           → [ A ] ⊢ A
+  MP : ∀ {Γ₁ Γ₂ Δ A B} → Γ₁ ⊢ A ⇒ B → Γ₂ ⊢ A → Δ ≡ Γ₁ ⁏ Γ₂ → Δ ⊢ B
+  EX : ∀ {Γ x y A}     → Γ , x , y ⊢ A → Γ , y , x ⊢ A
+  AB : ∀ {A B C}       → ∅ ⊢ (B ⇒ C) ⇒ (A ⇒ B) ⇒ (A ⇒ C)
+  AC : ∀ {A B C}       → ∅ ⊢ (A ⇒ B ⇒ C) ⇒ B ⇒ A ⇒ C
+  AI : ∀ {A}           → ∅ ⊢ A ⇒ A
 infix 5 _⊢_
 
 
 det : ∀ {Γ A B} → Γ ⊢ A ⇒ B → Γ , A ⊢ B
-det t = MP t ID
+det t = MP t ID refl
 
-ded : ∀ {Γ Δ A B} → Γ ⊢ B → Γ ≡ Δ , A → Δ ⊢ A ⇒ B
-ded ID refl                       = AI
-ded (MP {Γ₂ = ∅} t₁ t₂) eq        = subst₂ _⊢_ unit⧺₁ refl (MP (MP AC (ded t₁ eq)) t₂)
-ded (MP {Γ₁} {xs , A} t₁ t₂) refl = subst₂ _⊢_ (unit⧺₂ {L₁ = Γ₁} {xs}) refl (MP (MP AB t₁) (ded t₂ refl))
-ded (EX {∅} t) refl               = subst₂ _⊢_ unit⧺₁ refl (ded t refl)
-ded (EX {Γ₁ , A} {∅} t) refl      = subst₂ _⊢_ (sym unit⧺₁) refl (ded t refl)
-ded (EX {Γ₁ , A} {Γ₂ , x} t) refl = {!!}
-ded AB ()
-ded AC ()
-ded AI ()
-
+{-# TERMINATING #-} --Oops.
+ded : ∀ {Γ A B} → Γ , A ⊢ B → Γ ⊢ A ⇒ B
+ded ID = AI
+ded {Γ} {A'} {B'} (MP {Γ₁} {∅} {_} {A} t₁ t₂ refl) = begin[ t₁ ]
+  Γ , A' ⊢ A ⇒ B'     ↝[ ded ]
+  Γ ⊢ A' ⇒ A ⇒ B'     ↝[ (λ this → MP AC this refl) ]
+  ∅ ⁏ Γ ⊢ A ⇒ A' ⇒ B' ↝[ subst₂ _⊢_ (unit⧺₂ {L₂ = ∅}) refl ]
+  Γ ⊢ A ⇒ A' ⇒ B'     ↝[ (λ this → MP this t₂ refl) ]
+  Γ ⊢ A' ⇒ B' ∎
+ded {B = B} (MP {Γ₁} {xs , A'} {_} {A} t₁ t₂ refl) = begin[ t₁ ]
+  Γ₁ ⊢ A ⇒ B                   ↝[ (λ this → MP AB this refl) ]
+  ∅ ⁏ Γ₁ ⊢ (A' ⇒ A) ⇒ (A' ⇒ B) ↝[ subst₂ _⊢_ (unit⧺₂ {L₂ = ∅}) refl ]
+  Γ₁ ⊢ (A' ⇒ A) ⇒ (A' ⇒ B)     ↝[ (λ this → MP this (ded t₂) refl) ]
+  Γ₁ ⁏ xs ⊢ (A' ⇒ B) ∎
+ded {_} {A} {B} (EX {Γ} {x} {y} t) = begin[ t ]
+  Γ , A , y ⊢ B     ↝[ ded ∘ ded ]
+  Γ ⊢ A ⇒ y ⇒ B     ↝[ (λ this → MP AC this refl) ]
+  ∅ ⁏ Γ ⊢ y ⇒ A ⇒ B ↝[ subst₂ _⊢_ (unit⧺₂ {L₂ = ∅}) refl ]
+  Γ ⊢ y ⇒ A ⇒ B     ↝[ (λ this → MP this ID refl) ]
+  Γ , y ⊢ A ⇒ B ∎

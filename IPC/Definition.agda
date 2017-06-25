@@ -29,11 +29,7 @@ assumpCx = weakenCx₂ (assump)
 
 -- Detachment theorem.
 det : ∀ {Γ α β} → Γ ⊢ α ⊳ β → Γ , α ⊢ β
-det {Γ} {α} {β} t = begin[ t ]
-  Γ ⊢ α ⊳ β     ↝[ weaken {γ = α} ]
-  Γ , α ⊢ α ⊳ β ↝[ (λ this → mp this assump) ]
-  Γ , α , α ⊢ β ↝[ contract ]
-  Γ , α ⊢ β ∎
+det t = mp t assump
 
 -- Contraction for entire contexts.
 contractCx : ∀ {Γ α} → Γ ⁏ Γ ⊢ α → Γ ⊢ α
